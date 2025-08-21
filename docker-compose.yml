@@ -1,0 +1,74 @@
+version: '3.8'
+
+services:
+  web:
+    build: 
+      context: .
+      dockerfile: docker/web/Dockerfile
+    container_name: ventasplus_web
+    ports:
+      - "8083:80"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./logs:/var/www/html/logs
+      - ./uploads:/var/www/html/public/uploads
+      - ./:/var/www/html
+    depends_on:
+      - database
+      - redis
+    environment:
+      - DB_HOST=database
+      - DB_NAME=ventasplus_bi
+      - DB_USER=root
+      - DB_PASS=rootpassword
+      - REDIS_HOST=redis
+    networks:
+      - ventasplus_network
+
+  database:
+    image: mysql:8.0
+    container_name: ventasplus_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: ventasplus_bi
+      MYSQL_USER: ventasplus_user
+      MYSQL_PASSWORD: ventasplus_pass
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./database/migrations:/docker-entrypoint-initdb.d
+    networks:
+      - ventasplus_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: ventasplus_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - ventasplus_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: ventasplus_pma
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: database
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    depends_on:
+      - database
+    networks:
+      - ventasplus_network
+
+volumes:
+  db_data:
+  redis_data:
+
+networks:
+  ventasplus_network:
+    driver: bridge

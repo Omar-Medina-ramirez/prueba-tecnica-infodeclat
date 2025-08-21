@@ -1,0 +1,14 @@
+{
+    "name": "vendor/project",
+    "description": "A simple PHP project",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "vlucas/phpdotenv": "^5.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "VentasPlus\\": "src/"
+        }
+    }
+}
